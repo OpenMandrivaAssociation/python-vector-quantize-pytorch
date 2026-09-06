@@ -1,12 +1,13 @@
 Name:		python-vector-quantize-pytorch
 Version:	1.27.15
-Release:	2
+Release:	3
 Summary:	Vector quantization layers for PyTorch
 License:	MIT
 Group:		Development/Python
 URL:		https://github.com/lucidrains/vector-quantize-pytorch
 Source0:	https://files.pythonhosted.org/packages/source/v/vector-quantize-pytorch/vector_quantize_pytorch-%{version}.tar.gz
 Patch0:		0001-optional-torch-distributed-nn.patch
+Patch1:		0002-residual-fsq-meta-device-assert.patch
 BuildArch:	noarch
 BuildSystem:	python
 BuildRequires:	python

@@ -1,0 +1,32 @@
+# HF from_pretrained builds modules on meta; do not .item()/.all() those tensors.
+diff --git a/vector_quantize_pytorch/finite_scalar_quantization.py b/vector_quantize_pytorch/finite_scalar_quantization.py
+--- a/vector_quantize_pytorch/finite_scalar_quantization.py
++++ b/vector_quantize_pytorch/finite_scalar_quantization.py
+@@ -120,7 +120,11 @@
+         self.return_indices = return_indices
+ 
+         if return_indices:
+-            self.codebook_size = self._levels.prod().item()
++            # Python int: .prod().item() is illegal on meta tensors.
++            codebook_size = 1
++            for level in levels:
++                codebook_size *= int(level)
++            self.codebook_size = codebook_size
+             implicit_codebook = self._indices_to_codes(torch.arange(self.codebook_size))
+             self.register_buffer('implicit_codebook', implicit_codebook, persistent = False)
+ 
+diff --git a/vector_quantize_pytorch/residual_fsq.py b/vector_quantize_pytorch/residual_fsq.py
+--- a/vector_quantize_pytorch/residual_fsq.py
++++ b/vector_quantize_pytorch/residual_fsq.py
+@@ -82,8 +82,10 @@
+         self.levels = levels
+         self.layers = nn.ModuleList([])
+ 
++        # Do not assert on a torch tensor: transformers constructs the
++        # model under torch.device("meta"), and Tensor.all()/item() crash.
++        assert all(level > 1 for level in levels)
+         levels_tensor = tensor(levels)
+-        assert (levels_tensor > 1).all()
+ 
+         scales = []
+ 
