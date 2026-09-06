@@ -1,0 +1,37 @@
+# ROCm torch 2.14 ships a stub torch.distributed without group/nn.
+diff --git a/vector_quantize_pytorch/lookup_free_quantization.py b/vector_quantize_pytorch/lookup_free_quantization.py
+--- a/vector_quantize_pytorch/lookup_free_quantization.py
++++ b/vector_quantize_pytorch/lookup_free_quantization.py
+@@ -12,7 +12,10 @@
+ from contextlib import nullcontext
+ 
+ import torch.distributed as dist
+-from torch.distributed import nn as dist_nn
++try:
++    from torch.distributed import nn as dist_nn
++except ImportError:  # ROCm/HIP torch stubs omit distributed.nn
++    dist_nn = None
+ 
+ import torch
+ from torch import nn, einsum
+@@ -32,6 +35,8 @@
+ 
+ @cache
+ def is_distributed():
++    if dist_nn is None or not hasattr(dist, "is_initialized"):
++        return False
+     return dist.is_initialized() and dist.get_world_size() > 1
+ 
+ def maybe_distributed_mean(t):
+diff --git a/vector_quantize_pytorch/residual_fsq.py b/vector_quantize_pytorch/residual_fsq.py
+--- a/vector_quantize_pytorch/residual_fsq.py
++++ b/vector_quantize_pytorch/residual_fsq.py
+@@ -34,6 +34,8 @@
+ # distributed helpers
+ 
+ def is_distributed():
++    if not hasattr(dist, "is_initialized"):
++        return False
+     return dist.is_initialized() and dist.get_world_size() > 1
+ 
+ def get_maybe_sync_seed(device, max_size = 10_000):
