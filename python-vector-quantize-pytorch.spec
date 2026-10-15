@@ -1,6 +1,6 @@
 Name:		python-vector-quantize-pytorch
 Version:	1.27.15
-Release:	3
+Release:	4
 Summary:	Vector quantization layers for PyTorch
 License:	MIT
 Group:		Development/Python
@@ -11,7 +11,7 @@ Patch1:		0002-residual-fsq-meta-device-assert.patch
 BuildArch:	noarch
 BuildSystem:	python
 BuildRequires:	python
-BuildRequires:	pkgconfig(python)
+BuildRequires:	pkgconfig(python3)
 BuildRequires:	python%{pyver}dist(pip)
 BuildRequires:	python%{pyver}dist(hatchling)
 Requires:	python%{pyver}dist(einops)
